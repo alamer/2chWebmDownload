@@ -99,23 +99,26 @@ public class WmLoadWorker implements Runnable {
             HttpsURLConnection connection = (HttpsURLConnection) openConnection(m.getUrl());
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(30000);
-            File f = new File(output_dir + "/" + m.getThread());
-            if (!f.exists()) {
-                f.mkdirs();
+            int responseCode = connection.getResponseCode();
+            File f2 = new File(output_dir + "/" + m.getThread() + "/" + m.getFname());
+            if (!f2.isFile() && responseCode == 200) {
+                File f = new File(output_dir + "/" + m.getThread());
+                if (!f.exists()) {
+                    f.mkdirs();
+                }
+                out = new BufferedOutputStream(new FileOutputStream(output_dir + "/" + m.getThread() + "/" + m.getFname()));
+
+                in = connection.getInputStream();
+                byte[] buffer = new byte[1024];
+
+                int numRead;
+                long numWritten = 0;
+
+                while ((numRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, numRead);
+                    numWritten += numRead;
+                }
             }
-            out = new BufferedOutputStream(new FileOutputStream(output_dir + "/" + m.getThread() + "/" + m.getFname()));
-
-            in = connection.getInputStream();
-            byte[] buffer = new byte[1024];
-
-            int numRead;
-            long numWritten = 0;
-
-            while ((numRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, numRead);
-                numWritten += numRead;
-            }
-
             //logger.info(command + " " + tmp.getDesc());
         } catch (Exception ex) {
             //logger.error();

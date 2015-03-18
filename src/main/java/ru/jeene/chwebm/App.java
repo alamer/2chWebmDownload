@@ -80,7 +80,7 @@ public class App {
             }
             for (Model_Webm model_Webm : webm_list) {
                 //Добавляем в закачку
-                Runnable worker = new WmLoadWorker(model_Webm, "D:/");
+                Runnable worker = new WmLoadWorker(model_Webm, "D:/4chan");
                 executor.execute(worker);
             }
 
