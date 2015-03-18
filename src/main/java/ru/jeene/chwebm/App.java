@@ -52,13 +52,15 @@ public class App {
     private static App app;
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(App.class);
     @Option(name = "-t", usage = "Sets number of threads")        // no usage
-    private int THREAD_NUMBER = 2;
+    private int THREAD_NUMBER = 10;
     @Option(name = "-p", usage = "Sets number of pages to load")        // no usage
-    private int PAGE_TO_SCAN = 10;
-    @Option(name = "-dir", usage = "Dir for dump",required = true)        // no usage
+    private int PAGE_TO_SCAN = 20;
+    @Option(name = "-dir", usage = "Dir for dump", required = true)        // no usage
     private String DL_DIR;
+    @Option(name = "-topic", usage = "2ch topic", required = true)        // no usage
+    private String topic;
 
-    String main_url = "https://2ch.hk/b/";
+    String main_url = "https://2ch.hk/";
 
     public App(String[] args) {
 
@@ -70,6 +72,9 @@ public class App {
         }
         logger.info("Threads to use " + THREAD_NUMBER);
         logger.info("Pages to scan " + PAGE_TO_SCAN);
+        main_url += topic + "/";
+        logger.info("Url to scan " + main_url);
+        logger.info("Dump dir " + DL_DIR);
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
         for (int i = 1; i <= PAGE_TO_SCAN; i++) {
@@ -147,7 +152,7 @@ public class App {
                             new InputStreamReader(connection.getInputStream()))) {
                         String inputLine;
                         while ((inputLine = br.readLine()) != null) {
-                            System.out.println(inputLine);
+                            //System.out.println(inputLine);
                             res.append(inputLine);
                         }
                     }
