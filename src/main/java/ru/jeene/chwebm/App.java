@@ -12,6 +12,7 @@
 package ru.jeene.chwebm;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -39,6 +40,7 @@ import javax.net.ssl.X509TrustManager;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import ru.jeene.chwebm.models.Model_Cache;
 import ru.jeene.chwebm.models.Model_Webm;
 import ru.jeene.chwebm.worker.WmLoadWorker;
 import ru.jeene.chwebm.worker.utils.HTTPUtils;
@@ -61,6 +63,8 @@ public class App {
     private String topic;
 
     String main_url = "https://2ch.hk/";
+    String cache_file = "cache.xml";
+    Model_Cache cache;
 
     public App(String[] args) {
 
@@ -75,6 +79,13 @@ public class App {
         main_url += topic + "/";
         logger.info("Url to scan " + main_url);
         logger.info("Dump dir " + DL_DIR);
+        File f = new File(cache_file);
+
+        if (f.exists()) {
+            cache = Model_Cache.load(cache_file, "windows-1251");
+        } else {
+            cache = new Model_Cache();
+        }
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
         for (int i = 1; i <= PAGE_TO_SCAN; i++) {
@@ -83,7 +94,7 @@ public class App {
             if (webm_list.size() > 0) {
                 logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
             } else {
-                logger.info(main_url + i + ".json" + " empty");
+                logger.info(main_url + i + ".json" + " no new webm");
             }
             for (Model_Webm model_Webm : webm_list) {
                 //Добавляем в закачку
@@ -98,9 +109,14 @@ public class App {
             System.out.flush();
 
         }
-        //Load json by id
-        //Parse and get WM links
-        //
+        try {
+            Model_Cache.save(cache, cache_file);
+            //Load json by id
+            //Parse and get WM links
+            //
+        } catch (IOException ex) {
+            logger.error(ex);
+        }
 
     }
 
@@ -175,10 +191,16 @@ public class App {
             Matcher regexMatcher = regex.matcher(json);
             while (regexMatcher.find()) {
                 Model_Webm m = new Model_Webm();
+                Model_Webm c = cache.getList().get(main_url + regexMatcher.group());
                 m.setThread(regexMatcher.group(1));
                 m.setFname(regexMatcher.group(2));
                 m.setUrl(main_url + regexMatcher.group());
-                res.add(m);
+                if (c != null) {
+
+                } else {
+                    cache.getList().put(m.getUrl(), m);
+                    res.add(m);
+                }
                 // matched text: regexMatcher.group()
                 // match start: regexMatcher.start()
                 // match end: regexMatcher.end()
