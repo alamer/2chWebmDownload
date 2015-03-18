@@ -12,6 +12,7 @@
 package ru.jeene.chwebm.worker;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +99,10 @@ public class WmLoadWorker implements Runnable {
             HttpsURLConnection connection = (HttpsURLConnection) openConnection(m.getUrl());
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(30000);
-
+            File f = new File(output_dir + "/" + m.getThread());
+            if (!f.exists()) {
+                f.mkdirs();
+            }
             out = new BufferedOutputStream(new FileOutputStream(output_dir + "/" + m.getThread() + "/" + m.getFname()));
 
             in = connection.getInputStream();

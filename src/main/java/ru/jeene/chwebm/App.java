@@ -73,6 +73,11 @@ public class App {
         for (int i = 1; i <= PAGE_TO_SCAN; i++) {
             String tmp_str = loadJSON(main_url + i + ".json");
             ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
+            if (webm_list.size() > 0) {
+                logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
+            } else {
+                logger.info(main_url + i + ".json" + " empty");
+            }
             for (Model_Webm model_Webm : webm_list) {
                 //Добавляем в закачку
                 Runnable worker = new WmLoadWorker(model_Webm, "D:/");
@@ -157,6 +162,7 @@ public class App {
 
     private ArrayList<Model_Webm> parseJSON(String json) {
         ArrayList<Model_Webm> res = new ArrayList<>();
+        res.clear();
         try {
             Pattern regex = Pattern.compile("src/(\\d+?)/(\\d+?\\.webm)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
             Matcher regexMatcher = regex.matcher(json);
@@ -175,7 +181,6 @@ public class App {
             logger.error(ex);
         }
 
-        res.clear();
         return res;
     }
 
