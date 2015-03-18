@@ -55,6 +55,8 @@ public class App {
     private int THREAD_NUMBER = 2;
     @Option(name = "-p", usage = "Sets number of pages to load")        // no usage
     private int PAGE_TO_SCAN = 10;
+    @Option(name = "-dir", usage = "Dir for dump",required = true)        // no usage
+    private String DL_DIR;
 
     String main_url = "https://2ch.hk/b/";
 
@@ -80,15 +82,15 @@ public class App {
             }
             for (Model_Webm model_Webm : webm_list) {
                 //Добавляем в закачку
-                Runnable worker = new WmLoadWorker(model_Webm, "D:/4chan");
+                Runnable worker = new WmLoadWorker(model_Webm, DL_DIR);
                 executor.execute(worker);
             }
 
         }
         executor.shutdown();
         while (!executor.isTerminated()) {
-            //System.out.print("\rThinking... ");
-            //System.out.flush();
+            System.out.print("\rThinking... ");
+            System.out.flush();
 
         }
         //Load json by id
