@@ -56,7 +56,7 @@ public class App {
     @Option(name = "-t", usage = "Sets number of threads")        // no usage
     private int THREAD_NUMBER = 10;
     @Option(name = "-p", usage = "Sets number of pages to load")        // no usage
-    private int PAGE_TO_SCAN = 20;
+    private int PAGE_TO_SCAN = 10;
     @Option(name = "-dir", usage = "Dir for dump", required = true)        // no usage
     private String DL_DIR;
     @Option(name = "-topic", usage = "2ch topic", required = true)        // no usage
@@ -89,17 +89,24 @@ public class App {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
         for (int i = 1; i <= PAGE_TO_SCAN; i++) {
+            //get 
             String tmp_str = loadJSON(main_url + i + ".json");
-            ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
-            if (webm_list.size() > 0) {
-                logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
-            } else {
-                logger.info(main_url + i + ".json" + " no new webm");
-            }
-            for (Model_Webm model_Webm : webm_list) {
-                //Добавляем в закачку
-                Runnable worker = new WmLoadWorker(model_Webm, DL_DIR);
-                executor.execute(worker);
+
+            ArrayList<String> s = getThreadFromJson(tmp_str);
+            for (String threadNum : s) {
+                //@TODO Correct URL
+                //tmp_str = loadJSON(main_url + i + ".json");
+                ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
+                if (webm_list.size() > 0) {
+                    logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
+                } else {
+                    //logger.info(main_url + i + ".json" + " empty");
+                }
+                for (Model_Webm model_Webm : webm_list) {
+                    //Добавляем в закачку
+                    Runnable worker = new WmLoadWorker(model_Webm, DL_DIR);
+                    executor.execute(worker);
+                }
             }
 
         }
@@ -181,6 +188,23 @@ public class App {
             logger.error(ex);
         }
         return res.toString();
+    }
+
+    private ArrayList<String> getThreadFromJson(String json) {
+        ArrayList<String> res = new ArrayList<>();
+        try {
+            Pattern regex = Pattern.compile("\"num\":\"(\\d+?)\"", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+            Matcher regexMatcher = regex.matcher(json);
+            while (regexMatcher.find()) {
+                // matched text: 
+                res.add(regexMatcher.group(1));
+                // match start: regexMatcher.start()
+                // match end: regexMatcher.end()
+            }
+        } catch (PatternSyntaxException ex) {
+            // Syntax error in the regular expression
+        }
+        return res;
     }
 
     private ArrayList<Model_Webm> parseJSON(String json) {
