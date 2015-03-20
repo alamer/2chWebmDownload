@@ -126,7 +126,7 @@ public class WmLoadWorker implements Runnable {
                 r.setThread(m.getThread());
                 r.setStatus(Model_Report.STATUS_DL);
                 report.put(r);
-            } else {
+            } else if (!f2.isFile()) {
                 Model_Report r = new Model_Report();
                 r.setThread(m.getThread());
                 r.setStatus(Model_Report.STATUS_404);
