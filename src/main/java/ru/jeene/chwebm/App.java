@@ -203,11 +203,14 @@ public class App {
     private ArrayList<String> getThreadFromJson(String json) {
         ArrayList<String> res = new ArrayList<>();
         try {
-            Pattern regex = Pattern.compile("\"num\":\"(\\d+?)\"", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+            //Pattern regex = Pattern.compile("\"num\":\"(\\d+?)\"", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+            Pattern regex = Pattern.compile("data-thread=\\\\\"(\\d+?)\\\\\"", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
             Matcher regexMatcher = regex.matcher(json);
             while (regexMatcher.find()) {
                 // matched text: 
-                res.add(regexMatcher.group(1));
+                if (!res.contains(regexMatcher.group(1))) {
+                    res.add(regexMatcher.group(1));
+                }
                 // match start: regexMatcher.start()
                 // match end: regexMatcher.end()
             }
