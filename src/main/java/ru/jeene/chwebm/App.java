@@ -83,36 +83,47 @@ public class App {
 
         if (f.exists()) {
             cache = Model_Cache.load(cache_file, "windows-1251");
+            logger.info("Cache file exists: " + cache.getList().size() + " objects");
         } else {
             cache = new Model_Cache();
+            logger.info("Cache file does not exists");
         }
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
         for (int i = 1; i <= PAGE_TO_SCAN; i++) {
             //get 
-            String tmp_str = loadJSON(main_url + i + ".json");
-
+            String json_url = main_url + i + ".json";
+            logger.info("Load JSON URL:" + json_url);
+            String tmp_str = loadJSON(json_url);
+            logger.info("Done.");
+            logger.info("Getting thread nums from " + tmp_str);
             ArrayList<String> s = getThreadFromJson(tmp_str);
+            logger.info("Done. Number of threads: " + s.size());
             for (String threadNum : s) {
                 //@TODO Correct URL
-                tmp_str = loadJSON(main_url + "res/"+threadNum + ".json");
+                logger.info("Load JSON(thread: " + threadNum + ") URL:" + json_url);
+                tmp_str = loadJSON(main_url + "res/" + threadNum + ".json");
+                logger.info("Done.");
+                logger.info("Getting WEBMs from " + tmp_str);
                 ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
                 if (webm_list.size() > 0) {
-                    logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
+                    logger.info("Done. Webm's: " + webm_list.size());
                 } else {
-                    //logger.info(main_url + i + ".json" + " empty");
+                    logger.info("Done. No webm in thread");
                 }
                 for (Model_Webm model_Webm : webm_list) {
                     //Добавляем в закачку
+                    logger.info("Add Webm: " + model_Webm.getUrl() + " to download pool");
                     Runnable worker = new WmLoadWorker(model_Webm, DL_DIR);
                     executor.execute(worker);
+                    logger.info("Done.");
                 }
             }
 
         }
         executor.shutdown();
         while (!executor.isTerminated()) {
-            System.out.print("\rThinking... ");
+            System.out.print("\rWait while dl is complete... ");
             System.out.flush();
 
         }
@@ -179,7 +190,6 @@ public class App {
                             res.append(inputLine);
                         }
                     }
-                    logger.info("Done");
         } catch (KeyManagementException ex) {
             logger.error(ex);
         } catch (NoSuchAlgorithmException ex) {
