@@ -42,6 +42,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import ru.jeene.chwebm.models.Model_Cache;
 import ru.jeene.chwebm.models.Model_Webm;
+import ru.jeene.chwebm.models.Model_Report;
+import ru.jeene.chwebm.models.Report;
 import ru.jeene.chwebm.worker.WmLoadWorker;
 import ru.jeene.chwebm.worker.utils.HTTPUtils;
 
@@ -65,6 +67,7 @@ public class App {
     String main_url = "https://2ch.hk/";
     String cache_file = "cache.xml";
     Model_Cache cache;
+    Report report;
 
     public App(String[] args) {
 
@@ -74,6 +77,7 @@ public class App {
         } catch (CmdLineException ex) {
             logger.error(ex);
         }
+        report = new Report();
         logger.info("Threads to use " + THREAD_NUMBER);
         logger.info("Pages to scan " + PAGE_TO_SCAN);
         main_url += topic + "/";
@@ -114,7 +118,7 @@ public class App {
                 for (Model_Webm model_Webm : webm_list) {
                     //Добавляем в закачку
                     logger.info("Add Webm: " + model_Webm.getUrl() + " to download pool");
-                    Runnable worker = new WmLoadWorker(model_Webm, DL_DIR);
+                    Runnable worker = new WmLoadWorker(model_Webm, DL_DIR, report);
                     executor.execute(worker);
                     logger.info("Done.");
                 }
@@ -129,6 +133,7 @@ public class App {
         }
         try {
             Model_Cache.save(cache, cache_file);
+            logger.info(report.reportByCount());
             //Load json by id
             //Parse and get WM links
             //
@@ -233,7 +238,11 @@ public class App {
                 m.setFname(regexMatcher.group(2));
                 m.setUrl(main_url + regexMatcher.group());
                 if (c != null) {
-                    logger.info("Cached Webm: "+m.getUrl());
+                    logger.info("Cached Webm: " + m.getUrl());
+                    Model_Report r = new Model_Report();
+                    r.setThread(m.getThread());
+                    r.setStatus(Model_Report.STATUS_CACHED);
+                    report.put(r);
                 } else {
                     cache.getList().put(m.getUrl(), m);
                     res.add(m);

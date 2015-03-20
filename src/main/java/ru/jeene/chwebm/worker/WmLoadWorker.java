@@ -29,7 +29,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import ru.jeene.chwebm.models.Model_Report;
 import ru.jeene.chwebm.models.Model_Webm;
+import ru.jeene.chwebm.models.Report;
 
 /**
  *
@@ -41,10 +43,12 @@ public class WmLoadWorker implements Runnable {
 
     Model_Webm m;
     String output_dir;
+    Report report;
 
-    public WmLoadWorker(Model_Webm m, String output_dir) {
+    public WmLoadWorker(Model_Webm m, String output_dir, Report report) {
         this.m = m;
         this.output_dir = output_dir;
+        this.report = report;
     }
 
     @Override
@@ -118,6 +122,15 @@ public class WmLoadWorker implements Runnable {
                     out.write(buffer, 0, numRead);
                     numWritten += numRead;
                 }
+                Model_Report r = new Model_Report();
+                r.setThread(m.getThread());
+                r.setStatus(Model_Report.STATUS_DL);
+                report.put(r);
+            } else {
+                Model_Report r = new Model_Report();
+                r.setThread(m.getThread());
+                r.setStatus(Model_Report.STATUS_404);
+                report.put(r);
             }
             //logger.info(command + " " + tmp.getDesc());
         } catch (Exception ex) {
