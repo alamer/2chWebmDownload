@@ -96,7 +96,7 @@ public class App {
             logger.info("Load JSON URL:" + json_url);
             String tmp_str = loadJSON(json_url);
             logger.info("Done.");
-            logger.info("Getting thread nums from " + tmp_str);
+            logger.info("Getting thread nums from " + json_url);
             ArrayList<String> s = getThreadFromJson(tmp_str);
             logger.info("Done. Number of threads: " + s.size());
             for (String threadNum : s) {
@@ -104,7 +104,7 @@ public class App {
                 logger.info("Load JSON(thread: " + threadNum + ") URL:" + json_url);
                 tmp_str = loadJSON(main_url + "res/" + threadNum + ".json");
                 logger.info("Done.");
-                logger.info("Getting WEBMs from " + tmp_str);
+                logger.info("Getting WEBMs from " + json_url);
                 ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
                 if (webm_list.size() > 0) {
                     logger.info("Done. Webm's: " + webm_list.size());
@@ -233,7 +233,7 @@ public class App {
                 m.setFname(regexMatcher.group(2));
                 m.setUrl(main_url + regexMatcher.group());
                 if (c != null) {
-
+                    logger.info("Cached Webm: "+m.getUrl());
                 } else {
                     cache.getList().put(m.getUrl(), m);
                     res.add(m);
