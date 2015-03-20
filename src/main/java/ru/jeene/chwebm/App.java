@@ -95,7 +95,7 @@ public class App {
             ArrayList<String> s = getThreadFromJson(tmp_str);
             for (String threadNum : s) {
                 //@TODO Correct URL
-                //tmp_str = loadJSON(main_url + i + ".json");
+                tmp_str = loadJSON(main_url + "res/"+threadNum + ".json");
                 ArrayList<Model_Webm> webm_list = parseJSON(tmp_str);
                 if (webm_list.size() > 0) {
                     logger.info("Thread: " + webm_list.get(0).getThread() + " Webm's: " + webm_list.size());
